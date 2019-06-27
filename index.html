@@ -1,0 +1,238 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Nazwa strony test test test</title>
+  <link href="bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <link href="dataTables.min.css" rel="stylesheet">
+  <link href="login.css" rel="stylesheet" >
+<style>
+tbody tr:hover {
+    cursor: pointer;
+    background-color: rgb(210,210,210) !important;
+
+}
+</style>
+</head>
+<body>
+
+<!-- Modal -->
+<div class="modal fade" id="employeeModal" tabindex="-1" role="dialog" aria-labelledby="employeeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="employeeModalLabel">Dane pracownika</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+       <div class="form-group"><label>Imie Nazwisko</label><input class="form-control name" name="name"/></div>
+       <div class="form-group"><label>Stanowisko</label><input class="form-control position"  name="position"/></div>
+       <div class="form-group"><label>Wynagrodzenie netto</label><input class="form-control gross_income" name="gross_income"/></div>
+       <div class="form-group"><label>Wynagrodzenie za bieżący miesiąc</label><input class="form-control salary" name="salary"/></div>
+       <div class="form-group"><label>Biuro</label><input class="form-control office" name="office"/></div>
+       <div class="form-group"><label>Nr telefonu</label><input class="form-control phone" name="phone"/></div>
+       <div class="form-group"><label>Typ umowy</label><input class="form-control contract_type" name="contract_type"/></div>
+       <div class="form-group"><label>PESEL</label><input class="form-control pesel" name="pesel"/></div>
+       <div class="form-group"><label>Data zatrudnienia</label><input class="form-control employment_date" name="employment_date"/></div>
+       <div class="form-group"><label>Data urodzenia</label><input class="form-control date_birth" name="date_birth"/></div>
+       
+      </div>
+      <div class="modal-footer">
+      
+        <button type="button" class="removeButton btn btn-danger" data-dismiss="modal">Usuń pracownika</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+        <button id="saveButton" type="button" class="btn btn-primary" data-dismiss="modal">Zapisz zmiany</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button type="button" class="btn btn-success newButton">Dodaj pracownika</button>
+<table id="example" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+            <tr>
+                <th>Imie Nazwisko</th>
+                <th>Stanowisko</th>
+                <th>Biuro</th>
+                <th>Wynagrodzenie netto</th>
+                <th>Data zatrudnienia</th>
+                <th>PESEL</th>
+                <th>Nr telefonu</th>
+                <th>Typ umowy</th>
+                <th>Data urodzenia</th>
+            </tr>
+        </thead>
+        <tbody id ="Employees">
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Imie Nazwisko</th>
+                <th>Stanowisko</th>
+                <th>Biuro</th>
+                <th>Wynagrodzenie netto</th>
+                <th>Data zatrudnienia</th>
+                <th>PESEL</th>
+                <th>Nr telefonu</th>
+                <th>Typ umowy</th>
+                <th>Data urodzenia</th>
+            </tr>
+        </tfoot>
+    </table>
+<div class="message"></div>
+<script src="jquery.min.js"></script>
+<script src="bootstrap.min.js"></script>
+<script src="dataTables.min.js"></script>
+<script src="dataTables.bootstrap.min.js"></script>
+<script>
+        $(document).ready(function() {
+            loadEmployees();
+        } );
+        $(document).on("click","#Employees tr", function(){
+            $(".name").val($($(this).children()[0]).text());
+            $(".position").val($($(this).children()[1]).text());
+            $(".office").val($($(this).children()[2]).text());
+            $(".gross_income").val($($(this).children()[3]).text());
+            $(".salary").val("wyliczone na podstawie pensji"); 
+            $(".pesel").val($($(this).children()[5]).text());
+            $(".phone").val($($(this).children()[6]).text());
+            $(".contract_type").val($($(this).children()[7]).text());
+            $(".employment_date").val($($(this).children()[4]).text());
+            $(".date_birth").val($($(this).children()[8]).text());
+
+            $("#saveButton").addClass("updateButton");
+            
+            $(".removeButton").show();
+            $('#employeeModal').modal('show');
+        });
+        $(document).on("click",".newButton", function(){
+            $(".name").val("");
+            $(".position").val("");
+            $(".office").val("");
+            $(".gross_income").val("");
+            $(".salary").val("");
+            $(".pesel").val("");
+            $(".phone").val("");
+            $(".contract_type").val("");
+            $(".employment_date").val("");
+            $(".date_birth").val("");
+            
+            $("#saveButton").addClass("createButton");
+            $(".removeButton").hide();
+            $('#employeeModal').modal('show');
+            
+        });
+
+        $(document).on("click",".updateButton", function(){
+            dataPost = {
+                    'position_name': $(".position").val(),
+                    'contract_type': $(".contract_type").val(),
+                    'employment_date': $(".employment_date").val(),
+                    'full_name': $(".name").val(),
+                    'gross_income': $(".gross_income").val(),
+                    'office': $(".office").val(),
+                    'pesel': $(".pesel").val(),
+                    'phone': $(".phone").val(),
+                    'date_birth': $(".date_birth").val()
+            };
+            $.ajax({
+                url: 'http://localhost/inz/php/api.php',
+                type: 'POST',
+                data: JSON.stringify(dataPost),
+                success: function(result) {
+                console.log(result);
+                typeof result;
+                if(result) showMessage('success','Dane pracownika zaktualizowane pomyślnie');
+                else showMessage('danger','Wystąpił problem z zaktualizacją danych pracownika');
+                
+                $("#saveButton").removeClass("updateButton");
+                loadEmployees();
+                }
+            });
+            console.log('save');
+        });
+        $(document).on("click",".createButton", function(){
+            dataPost = {
+                    'position_name': $(".position").val(),
+                    'contract_type': $(".contract_type").val(),
+                    'employment_date': $(".employment_date").val(),
+                    'full_name': $(".name").val(),
+                    'gross_income': $(".gross_income").val(),
+                    'office': $(".office").val(),
+                    'pesel': $(".pesel").val(),
+                    'phone': $(".phone").val(),
+                    'date_birth': $(".date_birth").val()
+            };
+            $.ajax({
+                url: 'http://localhost/inz/php/api.php',
+                type: 'PUT',
+                data: JSON.stringify(dataPost),
+                success: function(result) {
+                console.log(result);
+                typeof result;
+                if(result) showMessage('success','Nowy pracownik dodany pomyślnie');
+                else showMessage('danger','Wystąpił problem z dodaniem nowego pracownika');
+                
+                $("#saveButton").removeClass("createButton");
+                loadEmployees();
+                }
+            });
+            console.log('save');
+        });
+
+        $(document).on("click",".removeButton", function(){
+            $.ajax({
+                url: 'http://localhost/inz/php/api.php',
+                type: 'DELETE',
+                data:  $(".pesel").val(),
+                success: function(result) {
+                console.log(result);
+                if(result == true) showMessage('success','Pracownik usunięty pomyślnie');
+                else showMessage('danger','Wystąpił problem z usunięciem pracownika');
+                loadEmployees();
+                }
+            });
+        });
+
+
+
+
+        function loadEmployees() {
+            $.get( "http://localhost/inz/php/api.php?call=employees", function( data ) {
+                var employees= JSON.parse(data);
+                tableHtml= "";
+                for(var i = 0; i < employees.length; i++) {
+                    tableHtml+="<tr><td>" + employees[i].full_name + "</td>";
+                    tableHtml+="<td>" + employees[i].position_name + "</td>";
+                    tableHtml+="<td>" + employees[i].office + "</td>";
+                    tableHtml+="<td>" + employees[i].gross_income + "</td>";
+                    tableHtml+="<td>" + employees[i].employment_date + "</td>";
+                    tableHtml+="<td>" + employees[i].pesel + "</td>";
+                    tableHtml+="<td>" + employees[i].phone + "</td>";
+                    tableHtml+="<td>" + employees[i].contract_type + "</td>";
+                    tableHtml+="<td>" + employees[i].date_birth + "</td></tr>";
+                }
+                $('#Employees').html(tableHtml); 
+                $('#example').DataTable();
+            });
+        }
+
+        function showMessage(type, content) {
+
+        // tslint:disable-next-line:max-line-length
+        let box = '<div class="alert alert-' + type 
+        + ' alert-dismissible"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>'
+        + content + '</strong></div>';
+
+
+        $('.message').html(box);
+        setTimeout(function() {
+            $('.message div').hide();
+        }, 3000);
+        }
+</script>
+</body>
+</html>
