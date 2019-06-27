@@ -38,7 +38,7 @@ tbody tr:hover {
        <div class="form-group"><label>Biuro</label><input class="form-control office" name="office"/></div>
        <div class="form-group"><label>Nr telefonu</label><input class="form-control phone" name="phone"/></div>
        <div class="form-group"><label>Typ umowy</label><input class="form-control contract_type" name="contract_type"/></div>
-       <div class="form-group"><label>PESEL</label><span class="form-control pesel" name="pesel"></span></div>
+       <div class="form-group"><label>PESEL</label><input class="form-control pesel" name="pesel"/></div>
        <div class="form-group"><label>Data zatrudnienia</label><input class="form-control employment_date" name="employment_date"/></div>
        <div class="form-group"><label>Data urodzenia</label><input class="form-control date_birth" name="date_birth"/></div>
        
@@ -54,9 +54,28 @@ tbody tr:hover {
     </div>
   </div>
 </div>
-<?php 
-        if($_SESSION['user'] == 'admin')
-         echo '<button type="button" class="btn btn-success newButton">Dodaj pracownika</button>' ?>
+<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reportModalLabel">Informacje o wynagrodzeniu w bieżącym miesiącu</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+       <div class="form-group"><label>Imie Nazwisko</label><input class="form-control name" name="name"/></div>
+       <div class="form-group"><label>Pensja brutto</label><input class="form-control gross_income" name="gross_income"/></div>
+
+       
+      </div>
+      <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+      </div>
+    </div>
+  </div>
+</div>
         
 <table id="example" class="table table-striped table-bordered" style="width:100%">
         <thead>
@@ -71,7 +90,11 @@ tbody tr:hover {
                 <th>Typ umowy</th>
                 <th>Data urodzenia</th>
                 
-                <th class="no-sort"></th>
+                <th class="no-sort">              
+                    <?php 
+                    if($_SESSION['user'] == 'admin')
+                    echo '<button type="button" class="btn btn-success newButton">Dodaj pracownika</button>' ?>
+                </th>
             </tr>
         </thead>
         <tbody id ="Employees">
@@ -88,7 +111,7 @@ tbody tr:hover {
                 <th>Typ umowy</th>
 
                 <th>Data urodzenia</th>
-                <th class="no-sort"></th>
+                <th></th>
             </tr>
         </tfoot>
     </table>
@@ -107,8 +130,7 @@ tbody tr:hover {
             $(".position").val($($(this).children()[1]).text());
             $(".office").val($($(this).children()[2]).text());
             $(".gross_income").val($($(this).children()[3]).text());
-            $(".salary").val("wyliczone na podstawie pensji"); 
-            $(".pesel").text($($(this).children()[5]).text());
+            $(".pesel").val($($(this).children()[5]).text());
             $(".phone").val($($(this).children()[6]).text());
             $(".contract_type").val($($(this).children()[7]).text());
             $(".employment_date").val($($(this).children()[4]).text());
@@ -125,7 +147,7 @@ tbody tr:hover {
             $(".office").val("");
             $(".gross_income").val("");
             $(".salary").val("");
-            $(".pesel").text("");
+            $(".pesel").val("");
             $(".phone").val("");
             $(".contract_type").val("");
             $(".employment_date").val("");
@@ -136,7 +158,11 @@ tbody tr:hover {
             $('#employeeModal').modal('show');
             
         });
+        $(document).on("click","#report", function(){
 
+            $('#reportModal').modal('show');
+            
+        });
         $(document).on("click",".updateButton", function(){
             dataPost = {
                     'position_name': $(".position").val(),
@@ -145,7 +171,7 @@ tbody tr:hover {
                     'full_name': $(".name").val(),
                     'gross_income': $(".gross_income").val(),
                     'office': $(".office").val(),
-                    'pesel': $(".pesel").text(),
+                    'pesel': $(".pesel").val(),
                     'phone': $(".phone").val(),
                     'date_birth': $(".date_birth").val()
             };
@@ -173,7 +199,7 @@ tbody tr:hover {
                     'full_name': $(".name").val(),
                     'gross_income': $(".gross_income").val(),
                     'office': $(".office").val(),
-                    'pesel': $(".pesel").text(),
+                    'pesel': $(".pesel").val(),
                     'phone': $(".phone").val(),
                     'date_birth': $(".date_birth").val()
             };
@@ -228,6 +254,7 @@ tbody tr:hover {
                     "</td><td><button type='button' id='report' class='btn btn-info'>Raport</button></td></tr>";
                 }
                 $('#Employees').html(tableHtml); 
+                $('#example').DataTable().destroy();
                 $('#example').DataTable( {
                 "columnDefs": [
                     { "orderable": false, "targets": 9 }

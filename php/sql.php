@@ -73,38 +73,17 @@ class SQL {
 			ORDER BY kl."IDENT", p.od, usr.nazwisko';
 
 		try{
-			$sql_query = pg_query($this->pgconn, $sql_query_str);
-			$ret =  pg_fetch_all($sql_query);
-			foreach ($ret as &$r)
-				$r['max'] = intval(filter_var($r['max'], FILTER_SANITIZE_NUMBER_INT));
+			$result = $this->conn->query($sql_query_str);
+			while ( $row = $result->fetch_assoc())  {
+				$ret[]=$row;
+				}
 		}catch (Exception $ex){
 			echo 'ERROR >> ' . $ex;
+			
 		}
-
 		return $ret;
 	}
 
-
-	public function fetchUsers(){
-		$ret = array();
-		$sql_query_str = '
-			SELECT
-				usr.imie,
-				usr.nazwisko,
-				usr.id id_usr,
-				usr.username
-			FROM sec_user usr
-			ORDER BY usr.username;';
-
-		try{
-			$sql_query = pg_query($this->pgconn, $sql_query_str);
-			$ret =  pg_fetch_all($sql_query);
-		}catch (Exception $ex){
-			echo 'ERROR >> ' . $ex;
-		}
-
-		return $ret;
-	}
 
 	public function updateEmployee($data){
 		
